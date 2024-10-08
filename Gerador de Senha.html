@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Senhas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        label, input, .senha-container {
+            display: block;
+            margin-bottom: 10px;
+        }
+        .senha-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            white-space: nowrap;
+        }
+        .senha-container label {
+            margin-right: 10px;
+            min-width: 250px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 300px;
+            padding: 5px;
+        }
+        button {
+            padding: 5px 10px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gerador de Senhas</h1>
+    <label for="inputText">Digite um texto:</label>
+    <input type="text" id="inputText" oninput="gerarSenhas()" placeholder="Digite aqui...">
+
+    <div class="output">
+        <!-- Senhas Numéricas -->
+        <div class="senha-container">
+            <label for="senhaNumerica6">Senha Numérica (6 dígitos):</label>
+            <input type="text" id="senhaNumerica6" readonly>
+            <button onclick="copiarSenha('senhaNumerica6')">Copiar</button>
+        </div>
+        <div class="senha-container">
+            <label for="senhaNumerica8">Senha Numérica (8 dígitos):</label>
+            <input type="text" id="senhaNumerica8" readonly>
+            <button onclick="copiarSenha('senhaNumerica8')">Copiar</button>
+        </div>
+        <div class="senha-container">
+            <label for="senhaNumerica10">Senha Numérica (10 dígitos):</label>
+            <input type="text" id="senhaNumerica10" readonly>
+            <button onclick="copiarSenha('senhaNumerica10')">Copiar</button>
+        </div>
+
+        <!-- Senhas Alfanuméricas -->
+        <div class="senha-container">
+            <label for="senhaAlfanumerica6">Senha Alfanumérica (6 dígitos):</label>
+            <input type="text" id="senhaAlfanumerica6" readonly>
+            <button onclick="copiarSenha('senhaAlfanumerica6')">Copiar</button>
+        </div>
+        <div class="senha-container">
+            <label for="senhaAlfanumerica8">Senha Alfanumérica (8 dígitos):</label>
+            <input type="text" id="senhaAlfanumerica8" readonly>
+            <button onclick="copiarSenha('senhaAlfanumerica8')">Copiar</button>
+        </div>
+        <div class="senha-container">
+            <label for="senhaAlfanumerica10">Senha Alfanumérica (10 dígitos):</label>
+            <input type="text" id="senhaAlfanumerica10" readonly>
+            <button onclick="copiarSenha('senhaAlfanumerica10')">Copiar</button>
+        </div>
+
+        <!-- Senhas Alfanuméricas com Caracteres Especiais -->
+        <div class="senha-container">
+            <label for="senhaAlfanumericaEspecial6">Senha Alfanumérica com Caracteres Especiais (6 dígitos):</label>
+            <input type="text" id="senhaAlfanumericaEspecial6" readonly>
+            <button onclick="copiarSenha('senhaAlfanumericaEspecial6')">Copiar</button>
+        </div>
+        <div class="senha-container">
+            <label for="senhaAlfanumericaEspecial8">Senha Alfanumérica com Caracteres Especiais (8 dígitos):</label>
+            <input type="text" id="senhaAlfanumericaEspecial8" readonly>
+            <button onclick="copiarSenha('senhaAlfanumericaEspecial8')">Copiar</button>
+        </div>
+        <div class="senha-container">
+            <label for="senhaAlfanumericaEspecial10">Senha Alfanumérica com Caracteres Especiais (10 dígitos):</label>
+            <input type="text" id="senhaAlfanumericaEspecial10" readonly>
+            <button onclick="copiarSenha('senhaAlfanumericaEspecial10')">Copiar</button>
+        </div>
+    </div>
+
+    <script>
+        // Função de hash simples para converter texto em um valor numérico (determinístico)
+        function gerarHash(texto) {
+            let hash = 0;
+            for (let i = 0; i < texto.length; i++) {
+                hash = (hash * 31 + texto.charCodeAt(i)) % 1000000007;
+            }
+            return hash;
+        }
+
+        // Função para embaralhar deterministicamente um array com base no valor de hash
+        function embaralharDeterministicamente(array, seed) {
+            let resultado = array.slice(); // Cópia do array original
+            let hash = seed;
+            for (let i = resultado.length - 1; i > 0; i--) {
+                hash = (hash * 31 + i) % 1000000007; // Atualiza o hash com base no índice
+                let j = hash % (i + 1); // Índice aleatório baseado no hash
+                [resultado[i], resultado[j]] = [resultado[j], resultado[i]]; // Troca os elementos
+            }
+            return resultado;
+        }
+
+        // Função para gerar senhas com base no texto e no comprimento especificado
+        function gerarSenhaDeterministica(texto, caracteres, comprimento) {
+            let hash = gerarHash(texto); // Gerar um valor hash com base no texto
+            let caracteresEmbaralhados = embaralharDeterministicamente(caracteres, hash);
+            return caracteresEmbaralhados.slice(0, comprimento).join(''); // Pega os primeiros "comprimento" caracteres
+        }
+
+        function gerarSenhas() {
+            const texto = document.getElementById('inputText').value;
+
+            // Definir os grupos de caracteres
+            const numeros = '0123456789'.split('');
+            const letrasMaiusculas = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+            const letrasMinusculas = 'abcdefghijklmnopqrstuvwxyz'.split('');
+            const caracteresEspeciais = '!@#$%^&*()_+-=[]{}|;:,.<>?'.split('');
+
+            // Gerar senhas numéricas determinísticas
+            document.getElementById('senhaNumerica6').value = gerarSenhaDeterministica(texto, numeros, 6);
+            document.getElementById('senhaNumerica8').value = gerarSenhaDeterministica(texto, numeros, 8);
+            document.getElementById('senhaNumerica10').value = gerarSenhaDeterministica(texto, numeros, 10);
+
+            // Gerar senhas alfanuméricas (maiúsculas, minúsculas e números) determinísticas
+            const alfanumerico = letrasMaiusculas.concat(letrasMinusculas, numeros);
+            document.getElementById('senhaAlfanumerica6').value = gerarSenhaDeterministica(texto, alfanumerico, 6);
+            document.getElementById('senhaAlfanumerica8').value = gerarSenhaDeterministica(texto, alfanumerico, 8);
+            document.getElementById('senhaAlfanumerica10').value = gerarSenhaDeterministica(texto, alfanumerico, 10);
+
+            // Gerar senhas alfanuméricas com caracteres especiais determinísticas
+            const alfanumericoEspecial = letrasMaiusculas.concat(letrasMinusculas, numeros, caracteresEspeciais);
+            document.getElementById('senhaAlfanumericaEspecial6').value = gerarSenhaDeterministica(texto, alfanumericoEspecial, 6);
+            document.getElementById('senhaAlfanumericaEspecial8').value = gerarSenhaDeterministica(texto, alfanumericoEspecial, 8);
+            document.getElementById('senhaAlfanumericaEspecial10').value = gerarSenhaDeterministica(texto, alfanumericoEspecial, 10);
+        }
+
+        // Função para copiar a senha para a área de transferência
+        function copiarSenha(id) {
+            const input = document.getElementById(id);
+            input.select();
+            input.setSelectionRange(0, 99999); // Para dispositivos móveis
+            document.execCommand("copy");
+            alert("Senha copiada: " + input.value);
+        }
+    </script>
+</body>
+</html>
